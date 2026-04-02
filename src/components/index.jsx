@@ -16,7 +16,7 @@ function Index() {
     setTopic("");
 
     try {
-      const res = await axios.post("http://localhost:3000/generate-script", {
+      const res = await axios.post("https://ai-vdo-script-generator-backend.onrender.com", {
         topic,
       });
 
