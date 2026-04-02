@@ -16,28 +16,32 @@ function Index() {
     setTopic("");
 
     try {
-      const res = await axios.post("https://ai-vdo-script-generator-backend.onrender.com", {
-        topic,
-      });
+      const res = await axios.post(
+        "https://ai-vdo-script-generator-backend.onrender.com/generate-script",
+        { topic }
+      );
 
       setMessages([
         ...newMessages,
         { role: "ai", text: res.data.script }
       ]);
     } catch (err) {
-      console.log(err);
+      console.log("ERROR:", err.response?.data || err.message);
+
+      setMessages([
+        ...newMessages,
+        { role: "ai", text: "⚠️ Error generating script. Try again." }
+      ]);
     }
   };
 
   return (
     <div className="h-screen flex flex-col bg-black text-white px-20 py-10">
 
-      {/* Header */}
-      <div className="p-4 text-center border-b border-gray-800 text-xl font-semibold ">
+      <div className="p-4 text-center border-b border-gray-800 text-xl font-semibold">
         AI Shorts Script Generator
       </div>
 
-      {/* Chat Area */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.map((msg, index) => (
           <div
@@ -53,14 +57,13 @@ function Index() {
         ))}
       </div>
 
-      {/* Input */}
       <div className="p-4 border-t border-gray-800 flex gap-2">
         <input
           type="text"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           placeholder="Write video topic"
-          className="flex-1 p-3 rounded-lg cursor-pointer bg-gray-900 outline-none"
+          className="flex-1 p-3 rounded-lg bg-gray-900 outline-none"
         />
         <button
           onClick={generateScript}
