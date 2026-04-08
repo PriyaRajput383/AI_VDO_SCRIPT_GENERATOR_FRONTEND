@@ -1,23 +1,30 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 
 function Index() {
   const [topic, setTopic] = useState("");
   const [messages, setMessages] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const bottomRef = useRef(null);
 
   const generateScript = async () => {
-    if (!topic) return;
+    if (!topic || loading) return;
 
     const newMessages = [
       ...messages,
       { role: "user", text: topic }
     ];
+
     setMessages(newMessages);
     setTopic("");
+    setLoading(true);
 
     try {
+      // 👉 simulate delay (so animation is visible)
+      await new Promise((r) => setTimeout(r, 1000));
+
       const res = await axios.post(
-        "https://ai-vdo-script-generator-backend.onrender.com/generate-script",
+        "http://localhost:3000/generate-script",
         { topic }
       );
 
@@ -33,43 +40,69 @@ function Index() {
         { role: "ai", text: "⚠️ Error generating script. Try again." }
       ]);
     }
+
+    setLoading(false);
   };
 
-  return (
-    <div className="h-screen flex flex-col bg-black text-white px-20 py-10">
+  // ✅ Auto scroll
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
 
-      <div className="p-4 text-center border-b border-gray-800 text-xl font-semibold">
-        AI Shorts Script Generator
+  return (
+    <div className="min-h-screen flex flex-col bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100">
+
+      {/* HEADER */}
+      <div className="text-center py-6 text-2xl font-semibold text-gray-700">
+         <span className="uppercase">Shorts Script Generator</span>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      {/* CHAT AREA */}
+      <div className="flex-1 overflow-y-auto px-4 md:px-20 pb-4 space-y-4 max-w-4xl w-full mx-auto">
+
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`max-w-xl p-3 rounded-lg ${
+            className={`p-4 rounded-2xl max-w-[80%] shadow-sm ${
               msg.role === "user"
-                ? "bg-purple-600 ml-auto"
-                : "bg-gray-800 mr-auto"
+                ? "bg-purple-400 text-white ml-auto"
+                : "bg-white text-gray-700 mr-auto"
             }`}
           >
             {msg.text}
           </div>
         ))}
+
+        {/* ✅ LOADING ANIMATION (TAILWIND ONLY) */}
+        {loading && (
+          <div className="bg-white p-4 rounded-2xl w-fit shadow-sm mr-auto">
+            <div className="flex gap-1">
+              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+            </div>
+          </div>
+        )}
+
+        <div ref={bottomRef}></div>
       </div>
 
-      <div className="p-4 border-t border-gray-800 flex gap-2">
+      {/* INPUT AREA */}
+      <div className="p-4 w-full max-w-4xl mx-auto flex gap-2">
         <input
           type="text"
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
-          placeholder="Write video topic"
-          className="flex-1 p-3 rounded-lg bg-gray-900 outline-none"
+          placeholder="Write your video topic..."
+          className="flex-1 p-3 rounded-full border border-gray-300 outline-none focus:ring-2 focus:ring-purple-300"
         />
+
         <button
           onClick={generateScript}
-          className="bg-purple-600 px-4 rounded-lg"
+          disabled={loading}
+          className="bg-purple-400 hover:bg-purple-500 text-white px-5 rounded-full transition disabled:opacity-50"
         >
-          Send
+          {loading ? "..." : "Send"}
         </button>
       </div>
 
