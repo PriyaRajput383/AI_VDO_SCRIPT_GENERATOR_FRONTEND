@@ -20,8 +20,8 @@ function Index() {
     setLoading(true);
 
     try {
-      // 👉 simulate delay (so animation is visible)
-      await new Promise((r) => setTimeout(r, 1000));
+      // small delay so animation is visible
+      await new Promise((r) => setTimeout(r, 800));
 
       const res = await axios.post(
         "http://localhost:3000/generate-script",
@@ -44,7 +44,7 @@ function Index() {
     setLoading(false);
   };
 
-  // ✅ Auto scroll
+  // auto scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
@@ -54,37 +54,55 @@ function Index() {
 
       {/* HEADER */}
       <div className="text-center py-6 text-2xl font-semibold text-gray-700">
-         <span className="uppercase">Shorts Script Generator</span>
+        ✨ AI Shorts Script Generator
       </div>
 
       {/* CHAT AREA */}
-      <div className="flex-1 overflow-y-auto px-4 md:px-20 pb-4 space-y-4 max-w-4xl w-full mx-auto">
+      <div className="flex-1 overflow-y-auto px-4 md:px-20 pb-4 max-w-4xl w-full mx-auto">
 
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`p-4 rounded-2xl max-w-[80%] shadow-sm ${
-              msg.role === "user"
-                ? "bg-purple-400 text-white ml-auto"
-                : "bg-white text-gray-700 mr-auto"
-            }`}
-          >
-            {msg.text}
-          </div>
-        ))}
-
-        {/* ✅ LOADING ANIMATION (TAILWIND ONLY) */}
-        {loading && (
-          <div className="bg-white p-4 rounded-2xl w-fit shadow-sm mr-auto">
-            <div className="flex gap-1">
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-              <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+        {/* 👇 EMPTY STATE */}
+        {messages.length === 0 && !loading ? (
+          <div className="flex flex-col items-center justify-center h-full text-center text-gray-600 px-4">
+            <div className="text-2xl md:text-3xl font-semibold mb-2">
+              👋 Hey, what’s up?
+            </div>
+            <div className="text-lg md:text-xl">
+              On which topic do you need a script today?
+            </div>
+            <div className="mt-2 text-sm text-gray-500">
+              Let’s work together ✨
             </div>
           </div>
-        )}
+        ) : (
+          <div className="space-y-4">
 
-        <div ref={bottomRef}></div>
+            {messages.map((msg, index) => (
+              <div
+                key={index}
+                className={`p-4 rounded-2xl max-w-[80%] shadow-sm ${
+                  msg.role === "user"
+                    ? "bg-purple-400 text-white ml-auto"
+                    : "bg-white text-gray-700 mr-auto"
+                }`}
+              >
+                {msg.text}
+              </div>
+            ))}
+
+            {/* 🔄 LOADING ANIMATION */}
+            {loading && (
+              <div className="bg-white p-4 rounded-2xl w-fit shadow-sm mr-auto">
+                <div className="flex gap-1">
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                  <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                </div>
+              </div>
+            )}
+
+            <div ref={bottomRef}></div>
+          </div>
+        )}
       </div>
 
       {/* INPUT AREA */}
